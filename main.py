@@ -5,9 +5,8 @@ import re
 
 class Window:
     variables = {}
-    rows = 0
-    unparsed_text = '''
-Hello {HR or Company Name},
+    rows = -1
+    unparsed_text = '''Hello {HR or Company Name},
 
 I am excited to apply for the {Position Title} role at {Company Name}. With a strong background as a product analyst and manager and extensive experience as a developer, I easily understand the business requirements and offer less time-consuming and more valuable solutions. In my  opinion, Cross-domain expertise greatly improves the ability to make and implement decisions 
 
@@ -23,25 +22,30 @@ Artem'''
         self.root.title('CL builder')
 
         self.mainframe = ttk.Frame(self.root)
-        self.mainframe.grid(column=0, row=0)
+        self.mainframe.grid(column=0, row=0, padx=20, pady=20)
 
-        ttk.Label(self.mainframe, text='Enter your CL template').grid(column=0, row=0)
+        ttk.Label(self.mainframe, text='Enter your CL template').grid(columnspan=2, row=self.get_rows())
         self.entry = tk.Text(self.mainframe, width=50)
+        self.entry.config(wrap=tk.WORD)
         self.entry.insert(tk.END, self.unparsed_text)
-        self.entry.grid(column=0, row=1)
+        self.entry.grid(columnspan=2, row=self.get_rows())
         self.btn = tk.Button(self.mainframe, height=1, width=10, text="Commit",
                              command=lambda: self.parse_text())
-        self.btn.grid(column=0, row=2)
+        self.btn.grid(columnspan=2, row=self.get_rows())
 
         self.root.mainloop()
 
+    def get_rows(self):
+        self.rows += 1
+        return self.rows
+
     def add_value(self, match):
         text = match.replace('{', '').replace('}', '')
-        ttk.Label(self.mainframe, text=text).grid(column=0, row=self.rows)
+        row = self.get_rows()
+        ttk.Label(self.mainframe, text=text).grid(column=0, row=row)
         var = tk.StringVar()
-        tk.Entry(self.mainframe, textvariable=var, width=20).grid(column=1, row=self.rows)
+        tk.Entry(self.mainframe, textvariable=var, width=20).grid(column=1, row=row)
         self.variables[match] = var
-        self.rows += 1
 
     def process_text(self):
         text = self.unparsed_text
@@ -58,11 +62,10 @@ Artem'''
     def parse_text(self):
         text = self.get_text()
         matches = re.findall('{[^{}]*}', text)
-        self.rows = 3
         for match in matches:
             self.add_value(match)
         tk.Button(self.mainframe, height=1, width=10, text="finish",
-                  command=lambda: self.return_text()).grid(column=0, row=self.rows)
+                  command=lambda: self.return_text()).grid(column=0, row=self.get_rows())
 
     def get_text(self) -> str:
         self.unparsed_text = self.entry.get("1.0", tk.END)
@@ -71,7 +74,6 @@ Artem'''
 
 def main():
     w = Window()
-
 
 if __name__ == '__main__':
     main()
