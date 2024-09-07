@@ -24,14 +24,13 @@ Artem'''
         self.mainframe = ttk.Frame(self.root)
         self.mainframe.grid(column=0, row=0, padx=20, pady=20)
 
-        ttk.Label(self.mainframe, text='Enter your CL template').grid(columnspan=2, row=self.get_rows())
-        self.entry = tk.Text(self.mainframe, width=50)
-        self.entry.config(wrap=tk.WORD)
+        ttk.Label(self.mainframe, text='Enter your CL template').grid(columnspan=2, row=self.get_rows(), sticky='w')
+        self.entry = tk.Text(self.mainframe, width=50, wrap=tk.WORD, pady=10, padx=20)
         self.entry.insert(tk.END, self.unparsed_text)
         self.entry.grid(columnspan=2, row=self.get_rows())
-        self.btn = tk.Button(self.mainframe, height=1, width=10, text="Commit",
+        self.btn = tk.Button(self.mainframe, height=1, width=10, text="Parse",
                              command=lambda: self.parse_text())
-        self.btn.grid(columnspan=2, row=self.get_rows())
+        self.btn.grid(columnspan=2, row=self.get_rows(), pady=10)
 
         self.root.mainloop()
 
@@ -39,12 +38,13 @@ Artem'''
         self.rows += 1
         return self.rows
 
-    def add_value(self, match):
+    def add_inputs(self, match):
         text = match.replace('{', '').replace('}', '')
         row = self.get_rows()
-        ttk.Label(self.mainframe, text=text).grid(column=0, row=row)
+        label = ttk.Label(self.mainframe, text=text, justify='center')
+        label.grid(column=0, row=row, sticky="e")
         var = tk.StringVar()
-        tk.Entry(self.mainframe, textvariable=var, width=20).grid(column=1, row=row)
+        tk.Entry(self.mainframe, textvariable=var).grid(column=1, row=row, sticky="wesn", padx=10)
         self.variables[match] = var
 
     def process_text(self):
@@ -63,9 +63,9 @@ Artem'''
         text = self.get_text()
         matches = re.findall('{[^{}]*}', text)
         for match in matches:
-            self.add_value(match)
-        tk.Button(self.mainframe, height=1, width=10, text="finish",
-                  command=lambda: self.return_text()).grid(column=0, row=self.get_rows())
+            self.add_inputs(match)
+        tk.Button(self.mainframe, height=1, width=10, text="Replace",
+                  command=lambda: self.return_text()).grid(columnspan=2, row=self.get_rows(), pady=10)
 
     def get_text(self) -> str:
         self.unparsed_text = self.entry.get("1.0", tk.END)
