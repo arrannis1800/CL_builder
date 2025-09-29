@@ -8,11 +8,11 @@ class Window:
     rows = -1
     unparsed_text = '''Hello {HR or Company Name},
 
-I am excited to apply for the {Position Title} role at {Company Name}. With a strong background as a product analyst and manager and extensive experience as a developer, I easily understand the business requirements and offer less time-consuming and more valuable solutions. In my  opinion, Cross-domain expertise greatly improves the ability to make and implement decisions 
+I am excited to apply for the {Position Title} role at {Company Name}. I am an experienced C++/Unreal Engine developer with a strong background in gameplay systems, UI/UX, performance optimization, and tool development. For example, at Social Quantum, I improved developer efficiency by 30% through custom QA tools and refactored legacy code to reduce maintenance time by 25%.
 
-I have a deep understanding of the game development pipeline and the collaborative work of different specialists, because of my diverse experience, including game jams. That allows me easily to connect with colleagues across the game development pipeline and contribute to team projects.
+I am particularly impressed by {Company Name}'s work on {specific project or type of game}, and I am eager to contribute my expertise to {specific aspect: gameplay systems, UI, performance, tools, etc.}. My cross-domain experience allows me to collaborate effectively with designers, QA, and backend teams to deliver polished game features.
 
-I am currently seeking a team where I can face new professional challenges and help create innovative projects like yours. I believe my skills and values ​​align well with your company's mission and look forward to the opportunity to contribute to your success.
+I am looking for a team where I can tackle new challenges and help create engaging and high-quality projects. I would welcome the opportunity to bring my skills and passion for game development to your team.
 
 Best regards,
 Artem'''
@@ -39,19 +39,19 @@ Artem'''
         return self.rows
 
     def add_inputs(self, match):
-        text = match.replace('{', '').replace('}', '')
-        row = self.get_rows()
-        label = ttk.Label(self.mainframe, text=text, justify='center')
-        label.grid(column=0, row=row, sticky="e")
-        var = tk.StringVar()
-        tk.Entry(self.mainframe, textvariable=var).grid(column=1, row=row, sticky="wesn", padx=10)
-        self.variables[match] = var
+        if match not in self.variables:
+            text = match.replace('{', '').replace('}', '')
+            row = self.get_rows()
+            label = ttk.Label(self.mainframe, text=text, justify='center')
+            label.grid(column=0, row=row, sticky="e")
+            var = tk.StringVar()
+            tk.Entry(self.mainframe, textvariable=var).grid(column=1, row=row, sticky="wesn", padx=10)
+            self.variables[match] = var
 
     def process_text(self):
         text = self.unparsed_text
-        matches = re.findall('{[^{}]*}', text)
-        for match in matches:
-            text = text.replace(match, self.variables[match].get())
+        for placeholder, var in self.variables.items():
+            text = text.replace(placeholder, var.get())
         return text
 
     def return_text(self):
@@ -61,11 +61,11 @@ Artem'''
 
     def parse_text(self):
         text = self.get_text()
-        matches = re.findall('{[^{}]*}', text)
+        matches = set(re.findall(r'{[^{}]*}', text))
         for match in matches:
             self.add_inputs(match)
         tk.Button(self.mainframe, height=1, width=10, text="Replace",
-                  command=lambda: self.return_text()).grid(columnspan=2, row=self.get_rows(), pady=10)
+                  command=self.return_text).grid(columnspan=2, row=self.get_rows(), pady=10)
 
     def get_text(self) -> str:
         self.unparsed_text = self.entry.get("1.0", tk.END)
